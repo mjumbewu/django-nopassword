@@ -3,7 +3,12 @@ import time
 
 from django.contrib.auth import authenticate
 from django.test.utils import override_settings
-from django.utils import unittest
+
+try:
+    # django.utils.unittest deprecated in Django 1.7, removed in 1.9
+    from django.utils import unittest
+except ImportError:
+    import unittest
 
 from nopassword.models import LoginCode
 from nopassword.utils import get_user_model

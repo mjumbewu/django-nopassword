@@ -5,7 +5,13 @@ import django
 from django.contrib.auth import authenticate
 from django.test import SimpleTestCase
 from django.test.utils import mail, override_settings
-from django.utils import unittest
+
+try:
+    # django.utils.unittest deprecated in Django 1.7, removed in 1.9
+    from django.utils import unittest
+except ImportError:
+    import unittest
+
 from mock import MagicMock, patch
 
 from nopassword.backends.base import NoPasswordBackend
@@ -29,6 +35,8 @@ class AuthenticationBackendTests(unittest.TestCase):
 @override_settings(AUTH_USER_MODEL='tests.PhoneNumberUser', NOPASSWORD_TWILIO_SID="aaaaaaaa",
                    NOPASSWORD_TWILIO_AUTH_TOKEN="bbbbbbbb", DEFAULT_FROM_NUMBER="+15555555")
 class TwilioBackendTests(SimpleTestCase):
+    allow_database_queries = True
+
     def setUp(self):
         self.user = get_user_model().objects.create(username='twilio_user')
         self.code = LoginCode.create_code_for_user(self.user, next='/secrets/')
@@ -64,6 +72,8 @@ class TwilioBackendTests(SimpleTestCase):
 
 @skipIf(django.VERSION < (1, 5), 'Custom user not supported')
 class EmailBackendTests(SimpleTestCase):
+    allow_database_queries = True
+
     def setUp(self):
         self.user = get_user_model().objects.create(
             username='email_user',
