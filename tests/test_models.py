@@ -51,6 +51,17 @@ class TestLoginCodes(unittest.TestCase):
         time.sleep(3)
         self.assertIsNone(authenticate(username=self.user.username, code=timeout_code.code))
 
+    def test_code_not_reusable_by_default(self):
+        timeout_code = LoginCode.create_code_for_user(self.user)
+        self.assertIsNotNone(authenticate(username=self.user.username, code=timeout_code.code))
+        self.assertFalse(LoginCode.objects.filter(user=self.user, code=timeout_code.code).exists())
+
+    @override_settings(NOPASSWORD_LOGIN_CODE_IS_REUSABLE=True)
+    def test_code_is_reusable(self):
+        timeout_code = LoginCode.create_code_for_user(self.user)
+        self.assertIsNotNone(authenticate(username=self.user.username, code=timeout_code.code))
+        self.assertTrue(LoginCode.objects.filter(user=self.user, code=timeout_code.code).exists())
+
     def test_login_url_secure(self):
         self.assertTrue(self.code.login_url(secure=True).startswith('https:'))
 

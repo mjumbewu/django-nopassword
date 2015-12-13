@@ -23,7 +23,12 @@ class NoPasswordBackend(ModelBackend):
                 login_code = LoginCode.objects.get(user=user, code=code, timestamp__gt=timestamp)
                 user = login_code.user
                 user.code = login_code
-                login_code.delete()
+
+                # Keep the login code around if the user can use it until it
+                # expires. Otherwise, dump it.
+                if not getattr(settings, 'NOPASSWORD_LOGIN_CODE_IS_REUSABLE', False):
+                    login_code.delete()
+
                 return user
         except (TypeError, get_user_model().DoesNotExist, LoginCode.DoesNotExist, FieldError):
             return None
