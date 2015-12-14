@@ -48,7 +48,8 @@ class TestLoginCodes(unittest.TestCase):
     @override_settings(NOPASSWORD_LOGIN_CODE_TIMEOUT=1)
     def test_code_timeout(self):
         timeout_code = LoginCode.create_code_for_user(self.user)
-        time.sleep(3)
+        timeout_code.timestamp -= timedelta(seconds=5)
+        timeout_code.save()
         self.assertIsNone(authenticate(username=self.user.username, code=timeout_code.code))
 
     def test_code_not_reusable_by_default(self):

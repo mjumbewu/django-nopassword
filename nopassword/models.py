@@ -24,10 +24,8 @@ class LoginCode(models.Model):
         return "%s - %s" % (self.user, self.timestamp)
 
     def save(self, *args, **kwargs):
-        if settings.USE_TZ:
-            self.timestamp = timezone.now()
-        else:
-            self.timestamp = datetime.now()
+        if not self.timestamp:
+            self.timestamp = timezone.now() if settings.USE_TZ else datetime.now()
 
         if not self.next:
             self.next = '/'
